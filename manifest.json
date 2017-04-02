@@ -1,0 +1,38 @@
+{
+    "manifest_version": 2,
+
+    "name": "Yamaka",
+    "description": "Yamaha Keyboard Access, for controlling Yamaha Receivers",
+    "version": "1.0",
+
+    "permissions": [
+        "<all_urls>"
+    ],
+    "browser_action": {
+        "default_icon": "icon.png",
+        "default_popup": "yamaka.html"
+    },
+    "icons": {
+        "128": "icon.png"
+    },
+    "background": {
+        "page": "yamaka_agent.html",
+        "persistent": true
+    },
+    "commands": {
+        "volume-up": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Up"
+            },
+            "description": "Volume Up",
+            "global": true
+        },
+        "volume-down": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Down"
+            },
+            "description": "Volume Down",
+            "global": true
+        }
+    }
+}
