@@ -33,6 +33,13 @@
             },
             "description": "Volume Down",
             "global": true
+        },
+        "toggle-mute": {
+            "suggested_key": {
+                "default": "Ctrl+Shift+Left"
+            },
+            "description": "Mute On/Off",
+            "global": true
         }
     }
 }

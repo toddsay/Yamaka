@@ -12,10 +12,23 @@ $(document).ready(function() {
         if (command == "volume-down") {
             adjustVolume(-volIncrement);
         }
+        if (command == "toggle-mute") {
+            getMuteEnabled(function(isMute) {
+                setMute(!isMute);
+            });
+        }
     });
 
     setTimeout(function() {}, 10000);
 });
+
+function getStatus(findSetting, callback) {
+    var getCommand = buildYamahaCommand('GET', 1, 'Basic_Status', 'GetParam');
+    sendYamahaCommand(getCommand, function(response) {
+        var val = response.find(findSetting).text();
+        callback(val);
+    });
+}
 
 function adjustVolume(increment) {
     getCurrentVolume(function(volume) {
@@ -25,9 +38,7 @@ function adjustVolume(increment) {
 }
 
 function getCurrentVolume(callback) {
-    var getCommand = buildYamahaCommand('GET', 1, 'Volume', '<Lvl>GetParam</Lvl>');
-    sendYamahaCommand(getCommand, function(response) {
-        var val = response.find('Val').text();
+    getStatus('Volume Lvl Val', function(val) {
         var valInt = parseInt(val);
         callback(valInt);
     });
@@ -39,9 +50,25 @@ function setVolume(vol) {
     sendYamahaCommand(setCommand);
 }
 
+function getMuteEnabled(callback) {
+    getStatus('Volume Mute', function(val) {
+        var isMute = val === 'On';
+        callback(isMute);
+    });
+}
+
+function setMute(enable) {
+    var params = '<Mute>' + (enable ? 'On' : 'Off') + '</Mute>';
+    var setCommand = buildYamahaCommand('PUT', 1, 'Volume', params);
+    sendYamahaCommand(setCommand);
+}
+
 // Examples:
-// '<YAMAHA_AV cmd="GET"><Main_Zone><Volume><Lvl>GetParam</Lvl></Volume></Main_Zone></YAMAHA_AV>';
-// '<YAMAHA_AV cmd="PUT"><Main_Zone><Volume><Lvl><Val>-380</Val><Exp>1</Exp><Unit>dB</Unit></Lvl></Volume></Main_Zone></YAMAHA_AV>';
+// <YAMAHA_AV cmd="GET"><Main_Zone><Basic_Status>GetParam</Basic_Status></Main_Zone></YAMAHA_AV>
+// <YAMAHA_AV cmd="GET"><NET_RADIO><Play_Info>GetParam</Play_Info></NET_RADIO></YAMAHA_AV>
+// <YAMAHA_AV cmd="GET"><Main_Zone><Volume><Lvl>GetParam</Lvl></Volume></Main_Zone></YAMAHA_AV>
+// <YAMAHA_AV cmd="PUT"><Main_Zone><Volume><Lvl><Val>-380</Val><Exp>1</Exp><Unit>dB</Unit></Lvl></Volume></Main_Zone></YAMAHA_AV>
+// <YAMAHA_AV cmd="PUT"><Main_Zone><Volume><Mute>On</Mute></Volume></Main_Zone></YAMAHA_AV>
 function buildYamahaCommand(verb, zone, section, params) {
     var zoneNode = zone == 0 ? 'System' : zone == 2 ? 'Zone_2' : 'Main_Zone';
     var command = '<YAMAHA_AV cmd="' + verb + '"><' + zoneNode + '><' + section + '>' + params + '</' + section + '></' + zoneNode + '></YAMAHA_AV>';
